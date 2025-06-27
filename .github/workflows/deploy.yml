@@ -1,0 +1,45 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy via SSH
+      run: |
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << EOF
+          export NVM_DIR="\$HOME/.nvm"
+          [ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
+          nvm use default > /dev/null
+          export PATH="\$NVM_DIR/versions/node/\$(nvm version)/bin:\$PATH"
+
+          cd ${{ secrets.DIR }}
+
+          git pull origin master
+          npm install
+          npm run build
+
+          # Install serve globally if not present
+          command -v serve >/dev/null 2>&1 || npm install -g serve
+
+          # Kill any running serve process (optional cleanup)
+          pkill -f "serve -s build" || true
+
+          # Start serve in background with nohup
+          nohup serve -s build --listen 3000 > out.log 2>&1 &
+        EOF
+ 
