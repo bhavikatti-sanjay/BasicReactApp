@@ -2,7 +2,7 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [master]
+    branches: [main]
 
 jobs:
   deploy:
@@ -29,7 +29,7 @@ jobs:
 
           cd ${{ secrets.DIR }}
 
-          git pull origin master
+          git pull origin main
           npm install
           npm run build
 
