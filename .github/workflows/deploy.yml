@@ -15,10 +15,10 @@ jobs:
     - name: Set up SSH
       run: |
         mkdir -p ~/.ssh
-        printf "%s\n" "${{ secrets.KEY }}" > ~/.ssh/id_rsa
+        echo "${{ secrets.KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-        
+
     - name: Deploy via SSH
       run: |
         ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} << EOF
@@ -42,4 +42,3 @@ jobs:
           # Start serve in background with nohup
           nohup serve -s build --listen 3000 > out.log 2>&1 &
         EOF
- 
