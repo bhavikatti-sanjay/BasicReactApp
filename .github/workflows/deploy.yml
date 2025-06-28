@@ -15,7 +15,7 @@ jobs:
     - name: Set up SSH
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.KEY }}" > ~/.ssh/Key.pem
+        printf "%s\n" "${{ secrets.KEY }}" > ~/.ssh/Key.pem
         chmod 600 ~/.ssh/Key.pem
         ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
